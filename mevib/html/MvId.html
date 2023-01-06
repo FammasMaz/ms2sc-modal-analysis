@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="generator" content="hevea 2.06">
+
+<META name="Author" content="Balmes, Bianchi, Vermot des Roches"><link rel="stylesheet" type="text/css" href="sdtools.css">
+<title>Analyse modale expérimentale</title>
+</head>
+<!-- DOCNAME: SDT MvId.html --><body >
+<table border=0 width="100%" cellpadding=0 cellspacing=0><tr>
+<td valign=baseline align=right bgcolor="#9bd0e0">&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="TPMevibtoc.html" target="_top">Contents</a>&nbsp;&nbsp;&nbsp;&nbsp
+<a href="TPMevibfun.html" target="_top">Functions</a>&nbsp;&nbsp;&nbsp;&nbsp
+&nbsp;&nbsp;&nbsp;&nbsp<a href="tpModal.html"><img src="previous_motif.gif" alt="Previous"></a>
+&nbsp;&nbsp;&nbsp;&nbsp<a href="TPMevib.pdf">PDF</a>&nbsp;<a href="TPMevibindex.html" target="_top">Index</a></td></table>
+<h2 id="MvId" class="section">2  Analyse modale expérimentale</h2>
+<ul>
+<li><a href="MvId.html#MvIdQuest">Identification = problème inverse pour estimer les modes</a>
+</li><li><a href="MvId.html#MvIdMac">Corrélation calcul/essai</a>
+</li><li><a href="MvId.html#MvIdProc">Procédure d'identification</a>
+</li></ul>
+
+<h3 id="MvIdQuest" class="subsection">2.1  Identification = problème inverse pour estimer les modes</h3>
+<p>On cherche utilise maintenant des mesures au vibromètre laser chargées avec</p><pre class=codeinput>
+ mevib16(<span class=string>'loadBrake -ci 3'</span>); <span class=comment>% Ou boutton BrId de l'interface</span>
+</pre>
+<ul class="itemize"><li class="li-itemize">
+Q8: Identifier manuellement les modes expérimentaux manquants à l'aide de la commande SDT idcom. Voir   section <a href="#MvIdProc">2.3</a> pour le protocole d'identification des modes. Donner le résultat de votre identification en donnant 
+<ul class="itemize"><li class="li-itemize">
+la liste des pôles <font class=m>ci.Stack{'IdMain'}.po</font> (faire <font class=m><span class=sdt>idcom</span>('tableiipo')</font>)
+</li><li class="li-itemize">superpositions de fonctions de transfert illustrant la qualité de votre résultat (au plus 3 superpositions).
+</li></ul></li><li class="li-itemize">Q9: visualiser les deux premiers modes identifiés en figure 55. Les décrire = leur donner un nom.</li><li class="li-itemize">Q10: quand on presse <img src="plus.png"> dans <font class=m><span class=sdt>iiplot</span></font> quel indice change t'on dans la formule (<a href="tpModal.html#eq%2AHmodal">1</a>)? Idem quand, on presse <img src="plus.png"> dans <font class=m><span class=sdt>feplot</span></font>? </li><li class="li-itemize">Q11: Quelles sont les propriétés (symboles de (<a href="tpModal.html#eq%2AHmodal">1</a>)) variantes d'un transfert à l'autre. </li></ul>
+<h3 id="MvIdMac" class="subsection">2.2  Corrélation calcul/essai</h3>
+<p>L'objectif de cette section est de présenter quelques notions de corrélation calcul/essai.</p><ul class="itemize"><li class="li-itemize">
+Q12: expérimentalement, où les modes {<span style="font-style:italic">y</span><sub><span style="font-style:italic">Test</span></sub>} sont ils connus ?
+</li><li class="li-itemize">Q13: dans le calcul, quelle matrice d'observation doit on construire pour comparer calculs {<span style="font-style:italic">c</span>&#X3C6;<sub><span style="font-style:italic">j</span></sub>} et essais {<span style="font-style:italic">y</span><sub><span style="font-style:italic">Test</span></sub>} ?
+</li></ul><p>La comparaison est faite à l'aide du critère de MAC (Modal Assurance Criterion) qui est le coefficient de corrélation donné par</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
+<span style="font-style:italic">MAC</span><sub><span style="font-style:italic">ij</span></sub>=</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell">&#X23AA;<br>
+&#X23AA;</td><td class="dcell">{<span style="font-style:italic">y</span><sub><span style="font-style:italic">Test</span>,<span style="font-style:italic">i</span></sub>}<sup><span style="font-style:italic">H</span></sup>{<span style="font-style:italic">c</span>&#X3C6;<sub><span style="font-style:italic">j</span></sub>} </td><td class="dcell">&#X23AA;<br>
+&#X23AA;</td><td class="dcell"><sup>2</sup></td></tr>
+</table></td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">({<span style="font-style:italic">y</span><sub><span style="font-style:italic">Test</span>,<span style="font-style:italic">i</span></sub>}<sup><span style="font-style:italic">H</span></sup>{<span style="font-style:italic">y</span><sub><span style="font-style:italic">Test</span>,<span style="font-style:italic">i</span></sub>})({<span style="font-style:italic">c</span>&#X3C6;<sub><span style="font-style:italic">j</span></sub>}<sup><span style="font-style:italic">H</span></sup>{<span style="font-style:italic">c</span>&#X3C6;<sub><span style="font-style:italic">j</span></sub>})</td></tr>
+</table></td><td class="dcell">
+    (2)</td></tr>
+</table><p>
+Le MAC vaut 1 (ou 100% selon la convention) pour des formes proportionnelles l'une à l'autre. Une valeur supérieure à 90 % est considérée comme très bonne. Au dessous de 0.6, les formes sont généralement très différentes. </p><pre class=codeinput>
+ mevib16(<span class=string>'viewmac'</span>);
+</pre>
+<ul class="itemize"><li class="li-itemize">
+Q14: À quoi correspondent les abscisses et ordonnées du graphe de MAC ?
+</li><li class="li-itemize">Q15: Quels modes sont bien corrélés ? En quoi le critère de MAC aide t'il par rapport à une visualisation directe des déformées ?</li></ul><p>Note : le modèle a été dégradé pour utiliser des éléments coque et contient le guide cable (qui n'est pas inclus dans le test ici, mais le sera plus tard). </p>
+<h3 id="MvIdProc" class="subsection">2.3  Procédure d'identification</h3>
+<p>La procédure utilise une figure de boutons (onglet <font class=m><span class=string>Ident</span></font>) et une figure d'affichage des courbes (<font class=m><span class=sdt>iiplot</span></font>).</p><p><img src="idcomgui.png">
+<img src="idcom_one.png"></p><ol class="enumerate" type=1><li class="li-enumerate">Pour identifier un mode :<ol class="enumerate" type=a><li class="li-enumerate">
+Cliquer sur le bouton <font class=m><span class=string>e</span></font> (entouré en jaune).</li><li class="li-enumerate">dans la figure <font class=m><span class=sdt>iiplot</span></font> contenant les réponses, cliquer sur le maximum du pic en fréquence (<font class=m><span class=string>Pick pole frequency</span></font>)</li><li class="li-enumerate">Pour valider le mode identifié, cliquer sur la flèche droite (entourée en rouge). La valeur est accessible par <font class=m>ci.Stack{'IdMain'}.po </font>.
+Pour enlever un pole utiliser la flèche gauche (entourée de vert).</li><li class="li-enumerate">Recommencer l'identification de modes autant de fois que nécessaire, en alternant avec le raffinement (voir point suivant)</li></ol></li><li class="li-enumerate">Après avoir identifié tous les modes, estimer la fonction de transfert large bande en cliquant sur <font class=m><span class=string>est</span></font> (entouré de bleu)</li><li class="li-enumerate">Sélectionner une bande de fréquence où l'identification n'est pas très bonne (utiliser les boutons <font class=m><span class=string>wmo</span></font> pour sélectionner et <font class=m><span class=string>w0</span></font> pour revenir à l'ensemble de la bande), puis utiliser une des optimisations <font class=m><span class=string>eopt</span></font> ou <font class=m><span class=string>eup</span></font> (Donner un nombre d'itération jusqu'à convergence du calcul (quadratic cost constant)). </li><li class="li-enumerate">Exécuter la commande <font class=m><span class=sdt>idcom</span>('tableIdMain')</font> dans la fenêtre de commande Matlab (command window) et copier le résultat dans votre compte rendu.</li></ol><p>Le processus fonctionnel de cette procédure et plus de détails peuvent être trouvés dans le manuel SDT (<font class=m><span class=sdt>sdtweb</span>('idrc')</font>) </p><br><font class=small>©1991-2015 by SDTools</font><hr>
+<a href="tpModal.html"><img src="previous_motif.gif" alt="Previous"></a>
+<a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
+</body>
+</html>

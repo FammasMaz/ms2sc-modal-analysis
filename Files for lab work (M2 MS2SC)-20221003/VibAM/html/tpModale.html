@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="hevea 2.06">
+
+<META name="Author" content="Balmes, Bianchi, Vermot des Roches, Martin"><link rel="stylesheet" type="text/css" href="sdtools.css">
+<title>Computation and estimation of transfers</title>
+</head>
+<!-- DOCNAME: SDT tpModale.html --><body >
+<table border=0 width="100%" cellpadding=0 cellspacing=0><tr>
+<td valign=baseline align=right bgcolor="#9bd0e0">&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="ProblemSetstoc.html" target="_top">Contents</a>&nbsp;&nbsp;&nbsp;&nbsp
+<a href="ProblemSetsfun.html" target="_top">Functions</a>&nbsp;&nbsp;&nbsp;&nbsp
+&nbsp;&nbsp;&nbsp;&nbsp<a href="tp1DOFe.html"><img src="previous_motif.gif" alt="Previous"></a>
+<a href="tpCorrelDBe.html"><img src="next_motif.gif" alt="Next"></a>
+&nbsp;&nbsp;&nbsp;&nbsp<a href="ProblemSets.pdf">PDF</a>&nbsp;<a href="ProblemSetsindex.html" target="_top">Index</a></td></table>
+<h2 id="tpModale" class="section">3  Computation and estimation of transfers</h2>
+<ul>
+<li><a href="tpModale.html#sec9">Computation of transfer functions in the frequency domain</a>
+</li><li><a href="tpModale.html#sec10">Time simulation and FRF estimation </a>
+</li></ul>
+<p>The objective of this session is to illustrate equations given in the modal basis (<a >??</a>) and (<a href="#eq%2Amodalmodel">3</a>). For this, one first analyzes the frequency response then simulation the test process using time transients and some signal processing steps.</p><p>To help through various steps, one will use different MATLAB toolboxes 
+</p><ul class="itemize"><li class="li-itemize">
+Structural Dynamics Toolbox (<font class=m>sdt</font>) for FEM computations
+</li><li class="li-itemize">Control Toolbox (<font class=m>control</font>) for time response simulation (<font class=m><span class=sdt>lsim</span></font> function to integrate linear time invariant systems, alternatives would have been calling <font class=m><span class=sdt>ode45</span></font> under MATLAB or <font class=m><span class=sdt>fe_time</span></font> with SDT)
+</li><li class="li-itemize">Signal Processing Toolbox (<font class=m>signal</font>) for the generation of anti-aliasing filters (<font class=m><span class=sdt>butter</span></font> function)
+</li></ul><p>To get the data 
+</p><ul class="itemize"><li class="li-itemize">On your PC, download the folder <font class=m>VibAM.zip</font> from <a href="https://www.sdtools.com/contrib/VibAM21.zip"><font class=m>https://www.sdtools.com/contrib/VibAM21.zip</font></a> (zipped file with keyword sent by email). Once unzipped go to this folder in MATLAB (<font class=m>pwd</font> must give the folder where you unzipped) and do <font class=m>startup</font>. 
+</li><li class="li-itemize">To obtain a SDT license key for your PC use  <font class=m><span class=sdt>sdtcheck</span>(<span class=string>'sitereq'</span>,<span class=string>'base-fem'</span>)</font>
+</li></ul>
+<h3 id="sec9" class="subsection">3.1  Computation of transfer functions in the frequency domain</h3>
+<p>The objective of this part is to understand the influence of terms in equation (<a href="#eq%2Amod2_3a">2</a>) for the computation of transfers as a sum of modal contributions (see course notes section 2.2.4)</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell"><a id="eq*mod2_3a"> </a> 
+<span style="font-style:italic">H</span>(ω) =  [<span style="font-style:italic">c</span>] [&#8722;<span style="font-style:italic">M</span>ω<sup>2</sup>+<span style="font-style:italic">K</span>]<sup>&#8722;1</sup> [<span style="font-style:italic">b</span>] ≈ 
+</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><span style="font-style:italic">N</span></td></tr>
+<tr><td class="dcell" style="text-align:center"><span style="font-size:xx-large">∑</span></td></tr>
+<tr><td class="dcell" style="text-align:center"><span style="font-style:italic">j</span>=1</td></tr>
+</table></td><td class="dcell"> </td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">[<span style="font-style:italic">c</span>]{φ<sub><span style="font-style:italic">j</span></sub>}{φ<sub><span style="font-style:italic">j</span></sub>}<sup><span style="font-style:italic">T</span></sup> [<span style="font-style:italic">b</span>]</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center"> &#8722;ω <sup>2</sup>+<span style="font-style:italic">i</span>ωζ<sub><span style="font-style:italic">j</span></sub>ω<sub><span style="font-style:italic">j</span></sub>+ω<sub><span style="font-style:italic">j</span></sub><sup>2</sup></td></tr>
+</table></td><td class="dcell"> 
+    (2)</td></tr>
+</table><p>
+and thus to analyzed equations of motion in the modal basis 
+</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell"><a id="eq*modalmodel"> </a>
+[<span style="font-style:italic">Is</span><sup>2</sup>+[<sup>\</sup> 2ζ<sub><span style="font-style:italic">j</span></sub>ω<sub><span style="font-style:italic">j</span></sub> <sub>\</sub> ]<span style="font-style:italic">s</span>+[<sup>\</sup> ω<sub><span style="font-style:italic">j</span></sub><sup>2</sup> <sub>\</sub> ]]{<span style="font-style:italic">q</span><sub><span style="font-style:italic">r</span></sub>}=[φ<sup><span style="font-style:italic">T</span></sup> <span style="font-style:italic">b</span>]{<span style="font-style:italic">u</span>}
+ <span style="font-style:italic">et</span>  {<span style="font-style:italic">y</span>} = [<span style="font-style:italic">c</span>φ] {<span style="font-style:italic">q</span><sub><span style="font-style:italic">r</span></sub>}
+    (3)</td></tr>
+</table><p>A FEM mesh of the considered engine cover was done earlier and can be loaded using 
+</p><pre class=codeinput>
+ load cc_model
+ cf=<span class=sdt>feplot</span>; cf.model=model; cf.def=def;<span class=sdt>fecom</span>(<span class=string>'ColorDataEvalY'</span>);
+ model
+ def
+</pre>
+<p>The data contains two data structures</p><pre class=codeinput>
+&gt;&gt; model <span class=comment>% model contains the model</span>
+model = 
+    Node: [2031x7 double]  <span class=comment>% sdtweb('node') </span>
+     Elt: [2021x18 double] <span class=comment>% sdtweb('elt')</span>
+&gt;&gt; def  <span class=comment>% contains the modes</span>
+def = 
+      def: [10195x30 double]
+      DOF: [10195x1 double]
+     data: [30x1 double]
+      fun: [1 2 0 8 0 0]
+    label: <span class=string>'Normal modes'</span>
+      lab: {30x1 cell}
+</pre>
+<p><font class=m>model</font> gives nodes, elements, properties ... <font class=m>def</font> contains the first 30 modes. </p><ul class="itemize"><li class="li-itemize">
+Identify the fields of <font class=m>def</font> in formula (<a href="#eq%2Amod2_3a">2</a>) and in the spatial view of the mesh shown on your screen 
+</li></ul><p>The following commands allow the generation of transfer functions. Fill in the <font class=m>???</font> to obtain an input at 426y (DOF <font class=m>426.02</font>) and an output at 1976y (DOF <font class=m>1976.02</font>) (one uses the low level calling format <font class=m>sys=<span class=sdt>nor2ss</span>(def,damp,InDOF,OutDOF,<span class=string>'Hz acc'</span>)</font>).
+</p><pre class=codeinput>
+ load cc_model
+ cf=<span class=sdt>feplot</span>; cf.model=model; cf.def=def;<span class=sdt>fecom</span>(<span class=string>'ColorDataEvalY'</span>);
+ damp=.01;
+ f=<span class=sdt>linspace</span>(0,5000,2048)'; <span class=comment>% frequencies</span>
+ sys=<span class=sdt>nor2ss</span>(def,damp, ??? , ??? ,<span class=string>'Hz acc'</span>);
+ <span class=sdt>qbode</span>(sys,f*2*pi,<span class=string>'iiplot "simul1" -po'</span>);
+ ci=<span class=sdt>iiplot</span>;<span class=sdt>iicom</span>(<span class=string>'sub1 1'</span>); <span class=comment>% pointer to responses</span>
+ ci.Stack{<span class=string>'simul1'</span>} <span class=comment>% Data structure containing response</span>
+</pre>
+<ul class="itemize"><li class="li-itemize">
+Comment the effect of changing damping <font class=m>damp</font> (ζ<sub><span style="font-style:italic">j</span></sub>). Note : to overlay multiple simulations use 
+<pre class=codeinput>
+ sys1=<span class=sdt>nor2ss</span>(def, ??? , ??? , ??? ,<span class=string>'Hz acc'</span>);
+ <span class=sdt>qbode</span>(sys1,f*2*pi,<span class=string>'iiplot "simul1" -po'</span>);
+ sys2=<span class=sdt>nor2ss</span>(def, ??? , ??? , ??? ,<span class=string>'Hz acc'</span>);
+ <span class=sdt>qbode</span>(sys2,f*2*pi,<span class=string>'iiplot "simul2" -po'</span>);
+</pre>
+</li><li class="li-itemize">The Rayleigh damping model assumes <span style="font-style:italic">C</span>=α <span style="font-style:italic">M</span> + β <span style="font-style:italic">K</span>, for α=0 choose β giving 1% damping for the first flexible mode. Comment the (poor) transfer obtained (indication <font class=m>damp</font> must be a vector proportional to <font class=m>def.data</font>).</li><li class="li-itemize">Comment the effect of choosing different input locations. Compare responses for input at 911.02 and 426.02). Indication to strengthen your argumentation: compare
+modal controlabilities φ<sub><span style="font-style:italic">j</span></sub><sup><span style="font-style:italic">T</span></sup><span style="font-style:italic">b</span> with the code below and see amplitudes of various modes at these DOF 
+<pre class=codeinput>
+ <span class=comment>% commandability computation </span>
+ [(1:size(def.def,2))' def.def'*<span class=sdt>fe_c</span>(def.DOF,[426;911]+.02)']
+ <span class=comment>% Show node numbers</span>
+ <span class=sdt>fecom</span>(<span class=string>'ColorDataEvalY -alpha.3'</span>);<span class=comment>%fecom('showline');</span>
+ <span class=sdt>fecom</span>(<span class=string>'textnode 426 911'</span>,<span class=string>'FontSize'</span>,16,<span class=string>'Color'</span>,<span class=string>'r'</span>)
+</pre>
+</li><li class="li-itemize">Propose a method to select an input location allowing a good controlability of all modes (implementation is not necessary)</li><li class="li-itemize">Use equations of motion in a truncated modal basis (<a href="#eq%2Amodalmodel">3</a>) to estimate the effect of adding a 10 g mass at nodes 426 then 911. The model uses MM units (mass in kg, displacement mm, force milli-N). Rationale : a mass is an external force proportional to acceleration at the same location (collocated transfer). What is the error made by only applying this mass in the <span style="font-style:italic">y</span> direction ?</li></ul>
+<h3 id="sec10" class="subsection">3.2  Time simulation and FRF estimation </h3>
+<p>From the FEM model, one builds a state-space model using SDT commands, then generate the transient and draws the response using <font class=m><span class=sdt>cc_simul</span></font>
+</p><pre class=codeinput>
+ load cc_model
+ cf=<span class=sdt>feplot</span>; cf.model=model; cf.def=def;
+ uf.t=<span class=sdt>linspace</span>(0,.5,2048)';  <span class=comment>% time vector</span>
+ uf.u0=uf.t*0;uf.u0(find(uf.t&lt;=1e-4))=1;  <span class=comment>% ch1 (input =impact 0.1 ms);</span>
+ uf.window=<span class=string>'None'</span>;  uf.noise=0; uf.filt=[];
+ damp=.001; 
+ uf.sys=<span class=sdt>nor2ss</span>(def,damp,426.02,1976.02,<span class=string>'Hz acc'</span>); <span class=comment>% State space model</span>
+ uf=<span class=sdt>cc_simul</span>(<span class=string>'simul'</span>,uf);<span class=sdt>cc_simul</span>(<span class=string>'plot'</span>,uf);
+</pre>
+<p>Run the script above. Questions:</p><ul class="itemize"><li class="li-itemize">The initial simulation has an aliasing problem. Describe the effects.</li><li class="li-itemize">Verify that aliasing disappears for a higher sampling frequency. What modeling approximation allows this effect to occur ? </li><li class="li-itemize">Describe the implementation of the simulation done in <font class=m><span class=sdt>cc_simul</span></font> with the <font class=m>simul</font> command at lines 45 to 77, as a block diagram for example. (You can open the code at the right line using <font class=m><span class=sdt>sdtweb</span> <span class=sdt>cc_simul</span>(<span class=string>'Without_filter'</span>)</font>). You can describe fields of the <font class=m>uf</font> structure and their use. </li><li class="li-itemize">One can use an anti-aliasing filter using the following call<pre class=codeinput>
+ load cc_model; cf=<span class=sdt>feplot</span>; cf.model=model; cf.def=def;
+ uf.t=<span class=sdt>linspace</span>(0,.5,2048)';  <span class=comment>% time vector</span>
+ fmax=1500;[num,den]=<span class=sdt>butter</span>(16,fmax*2*pi,<span class=string>'s'</span>);uf.filt=<span class=sdt>tf</span>(num,den);
+ uf.u0=uf.t*0;uf.u0(find(uf.t&lt;=1e-4))=1;  <span class=comment>% ch1 (input impact 0.1 ms);</span>
+ uf.window=<span class=string>'None'</span>;  uf.noise=0;damp=.001; 
+ uf.sys=<span class=sdt>nor2ss</span>(def,damp,426.02,1976.02,<span class=string>'Hz acc'</span>); <span class=comment>% state-space model</span>
+ uf=<span class=sdt>cc_simul</span>(<span class=string>'simul'</span>,uf);<span class=sdt>cc_simul</span>(<span class=string>'plot'</span>,uf)
+</pre>
+<p>Describe the usefulness of the anti-aliasing filter in this simulation. </p><p><span style="font-weight:bold">If you have a little time </span></p></li><li class="li-itemize">analyze the effect of windowing using an exponential window <pre class=codeinput>
+ uf.window=<span class=string>'exponential 0 10 3'</span>; <span class=comment>% 0 pts at 0, 10 pts at 1, end at exp(-3)</span>
+ uf=<span class=sdt>cc_simul</span>(<span class=string>'simul'</span>,uf);<span class=sdt>cc_simul</span>(<span class=string>'plot'</span>,uf)
+</pre>
+<p>Indication : look at the low frequency response and at the resonances. If you really want to look, it is possible to estimate the damping induced by the exponential window. </p></li><li class="li-itemize">analyze the effect of a sine sweep (often used for product qualification tests). How are modes seen in the response ?<pre class=codeinput>
+ uf.t=<span class=sdt>linspace</span>(0,.5,8000)';  <span class=comment>% time vector</span>
+ fmin=200;fmax=5000;
+ u=@(t)cos(2*pi*(fmin+(fmax-fmin)/2*t/uf.t(<span class=keyword>end</span>)).*t);  uf.u0=u(uf.t);
+</pre>
+</li></ul><p>End of lab work 2</p>
+<br><font class=small>©1991-2020 by SDTools</font><hr>
+<a href="tp1DOFe.html"><img src="previous_motif.gif" alt="Previous"></a>
+<a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
+<a href="tpCorrelDBe.html"><img src="next_motif.gif" alt="Next"></a>
+</body>
+</html>

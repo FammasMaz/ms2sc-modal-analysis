@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="hevea 2.06">
+
+<META name="Author" content="Balmes, Bianchi, Vermot des Roches, Martin"><link rel="stylesheet" type="text/css" href="sdtools.css">
+<title>Parametric reduced model. Identification. Test/analysis correlation.</title>
+</head>
+<!-- DOCNAME: SDT tpCorrelDBe.html --><body >
+<table border=0 width="100%" cellpadding=0 cellspacing=0><tr>
+<td valign=baseline align=right bgcolor="#9bd0e0">&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="ProblemSetstoc.html" target="_top">Contents</a>&nbsp;&nbsp;&nbsp;&nbsp
+<a href="ProblemSetsfun.html" target="_top">Functions</a>&nbsp;&nbsp;&nbsp;&nbsp
+&nbsp;&nbsp;&nbsp;&nbsp<a href="tpModale.html"><img src="previous_motif.gif" alt="Previous"></a>
+<a href="ProblemSets006.html"><img src="next_motif.gif" alt="Next"></a>
+&nbsp;&nbsp;&nbsp;&nbsp<a href="ProblemSets.pdf">PDF</a>&nbsp;<a href="ProblemSetsindex.html" target="_top">Index</a></td></table>
+<h2 id="tpCorrelDBe" class="section">4  Parametric reduced model. Identification. Test/analysis correlation.</h2>
+<ul>
+<li><a href="tpCorrelDBe.html#sec12">Parametric reduced model</a>
+</li><li><a href="tpCorrelDBe.html#sec13">Identification</a>
+</li><li><a href="tpCorrelDBe.html#sec14">Correlation</a>
+</li><li><a href="tpCorrelDBe.html#idcomproc">Annex : Identification procedure</a>
+</li></ul>
+<p>The project is continued using <span style="font-weight:bold">separate</span> questions about parametric model reduction and links between test and analysis. The test case is now an drum brake plate, one which a cable guide (small relatively flat piece) is riveted. The vibrations of this cable guide lead to impacts between the cable and the guide which are audible and thus problematic.</p>
+<h3 id="sec12" class="subsection">4.1  Parametric reduced model</h3>
+<p>One seeks to analyze the level of damping that can be introduced by introducing a viscoelastic glue at the cable-guide/plate junction. To analyze the potential of such a change, one generates a parametric model combining <span style="font-style:italic">M</span> the mass of the plate and the junction, <span style="font-style:italic">K</span><sub><span style="font-style:italic">e</span></sub> the elastic stiffness (glue not included), <span style="font-style:italic">K</span><sub><span style="font-style:italic">v</span></sub> the glue stiffness and <span style="font-style:italic">M</span><sub><span style="font-style:italic">g</span></sub> the mass of the cable guide. One then considers that the glue is viscoelastic with a loss factor η=1 and chooses a design parameter α corresponding the the adjustment of the glue modulus (technically α can be adjusted using a choice of material, thickness or surface). Computation of the complex modes is given by the parametric eigenvalue problem 
+</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
+[(<span style="font-style:italic">M</span>+β <span style="font-style:italic">M</span><sub><span style="font-style:italic">g</span></sub>)λ<sub><span style="font-style:italic">j</span></sub><sup>2</sup> + <span style="font-style:italic">K</span><sub><span style="font-style:italic">e</span></sub> + α (1+<span style="font-style:italic">i</span>η) <span style="font-style:italic">K</span><sub><span style="font-style:italic">v</span></sub>] {ψ<sub><span style="font-style:italic">j</span></sub>} = {0}
+    (4)</td></tr>
+</table><p>The script below runs a design study</p><ul class="itemize"><li class="li-itemize">
+3.1) One seeks to damp the cable guide bending modes. Describe what happens in the script. What is the purpose of calling <font class=m><span class=sdt>fe_norm</span></font> ? Describes the curves shown. Identify the cable guide rotation and bending modes for different glue stiffness. Propose an procedure to choose the optimal α. 
+</li></ul><pre class=codeinput>
+[ci,cf]=<span class=sdt>cc_simul</span>(<span class=string>'loadDBFE'</span>);
+Up=cf.mdl.GetData;CE=<span class=sdt>fe_case</span>(Up,<span class=string>'getcase'</span>);Up.Klab <span class=comment>% the matrix labels</span>
+
+m0=<span class=sdt>feutilb</span>(<span class=string>'sumkcoef'</span>,Up.K,[1 0 0 1]);
+k0= <span class=sdt>feutilb</span>(<span class=string>'sumkcoef'</span>,Up.K,[0 1 1 0]);
+d1=<span class=sdt>fe_eig</span>({m0,k0,CE.T,Up.DOF},[5 25 1e3]);
+d2=<span class=sdt>fe_eig</span>({<span class=sdt>feutilb</span>(<span class=string>'sumkcoef'</span>,Up.K,[1 0 0 1]), ... <span class=comment>% what is done here ?</span>
+    <span class=sdt>feutilb</span>(<span class=string>'sumkcoef'</span>,Up.K,[0 1 .01 0]), ...
+    CE.T,Up.DOF},[5 25 1e3]);
+d3=<span class=sdt>fe_eig</span>({<span class=sdt>feutilb</span>(<span class=string>'sumkcoef'</span>,Up.K,[1 0 0 .01]), ... <span class=comment>% what is done here ?</span>
+    <span class=sdt>feutilb</span>(<span class=string>'sumkcoef'</span>,Up.K,[0 1 1 0]), ...
+    CE.T,Up.DOF},[5 25 1e3]);
+
+ 
+ <span class=comment>% Build reduced basis and model</span>
+ [T,fr]=<span class=sdt>fe_norm</span>([d1.def d2.def d3.def],m0,k0); <span class=comment>% why is fe_norm called ?</span>
+ SE=Up;
+ SE.TR=struct(<span class=string>'def'</span>,T,<span class=string>'DOF'</span>,SE.DOF,<span class=string>'data'</span>,fr/2/pi); 
+ SE.K=<span class=sdt>feutilb</span>(<span class=string>'tkt'</span>,SE.TR.def,Up.K);
+
+<span class=comment>%% Compute poles as a function of alpha</span>
+ Range=logspace(-4,0,50)';def=[];
+ ceigopt=[1000 0 0 0 0 1e-8]; mcoef=1;
+ <span class=keyword>for</span> jpar=1:length(Range)
+   mr=<span class=sdt>feutilb</span>(<span class=string>'sumkcoef'</span>,SE.K,[1 0 0 mcoef]);
+   kr= <span class=sdt>feutilb</span>(<span class=string>'sumkcoef'</span>,SE.K,[0 1 Range(jpar)*(1+1i) 0]);
+   dr=<span class=sdt>fe_ceig</span>({mr,[],kr,(1:size(SE.K{1},1))'+.99},ceigopt);
+   <span class=comment>% merge for each design point</span>
+   i1=find(dr.data(:,1)&gt;1); dr.data(:,3)=Range(jpar);
+   def=<span class=sdt>fe_def</span>(<span class=string>'AppendDef'</span>,def,<span class=sdt>fe_def</span>(<span class=string>'subdef'</span>,dr,i1(1:15)));
+ <span class=keyword>end</span>
+ hpo=reshape(def.data(:,1),15,[]); <span class=comment>% Frequency history</span>
+ hpo(hpo&gt;2500)=NaN; <span class=comment>% don't display above 2500 Hz</span>
+ hda=reshape(def.data(:,2),15,[]); <span class=comment>% Damping history</span>
+
+ figure(1);clf;subplot(121);semilogx(Range,hpo');axis(<span class=string>'tight'</span>);
+ xlabel(<span class=string>'Glue Coef'</span>);ylabel(<span class=string>'Frequency [Hz]'</span>)
+ subplot(122);plot(hpo',hda'*100,<span class=string>'+'</span>);axis tight
+ xlabel(<span class=string>'Frequency [Hz]'</span>); ylabel(<span class=string>'Damping ratio[%]'</span>);
+
+ <span class=comment>% Display modes at a particular design point with interactive cursor</span>
+ def.LabFcn=<span class=string>'sprintf(''%.0f Hz %.2f %%, alpha=%.2f'',def.data(ch,1:3).*[1 100 1])'</span>;
+ def.TR=SE.TR; cf.def=def; <span class=sdt>fecom</span>(<span class=string>'colordataevala -edgealpha.05 -alpha.2'</span>);
+ <span class=sdt>cc_simul</span>(<span class=string>'rangedatacursor'</span>); <span class=comment>% open cursors</span>
+<span class=sdt>fecom</span>(<span class=string>'view4'</span>); <span class=comment>% relevant view</span>
+</pre>
+<ul class="itemize"><li class="li-itemize">
+3.2) Tracking the modeshapes is a notable (and classical) difficulty. Here, one compares, for the plate only, the shapes for a soft or stiff glue. Use the frequency evolution diagram to comment on the MAC computation built below. 
+</li></ul><pre class=codeinput>
+d1=<span class=sdt>fe_def</span>(<span class=string>'subdef'</span>,def,1:15);d1.name=<span class=string>'Soft'</span>;
+d2=<span class=sdt>fe_def</span>(<span class=string>'subdef'</span>,def,size(def.def,2)+[-14:0]);d2.name=<span class=string>'Stiff'</span>;
+d1f=d1;d1f.def=SE.TR.def*d1.def;d1f.DOF=SE.TR.DOF;
+d2f=d2;d2f.def=SE.TR.def*d2.def;d2f.DOF=SE.TR.DOF;
+<span class=comment>% Pseudo mass associated with DOFs on brake plate </span>
+ct=<span class=sdt>fe_c</span>(d1f.DOF,<span class=sdt>feutil</span>(<span class=string>'getdof'</span>,<span class=sdt>feutil</span>(<span class=string>'findnode matid 1'</span>,SE),(1:3)'/100));
+mp=ct'*ct;
+figure(11);<span class=sdt>ii_mac</span>(d1f,d2f,<span class=string>'m'</span>,mp,<span class=string>'mac mplot'</span>);
+</pre>
+<p>ADDITIONAL QUESTIONS (but consider the next part fist).
+</p><ul class="itemize"><li class="li-itemize">3.3) Modify the above script by only considering <font class=m>d1</font> for the reduction. Comment on the degradation of results.
+</li><li class="li-itemize">3.4) In question 3.2, can you interpret the relation between the MAC and the amplitude of generalized coordinates (<font class=m>abs(d1.def(7:15,1:10))</font>) ?
+</li></ul>
+<h3 id="sec13" class="subsection">4.2  Identification</h3>
+<p>A laser vibrometer test was performed with the objective of characterizing the plate. By following the procedure detailed in annex section <a href="#idcomproc">4.4</a> use the <font class=m><span class=sdt>idcom</span></font> interface to complete the partial identification given (your objective is to obtain a parametric model of the transfers). To start</p><pre class=codeinput>
+<span class=comment>% You can do close('all') here but not later</span>
+<span class=comment>%web(fullfile(fileparts(which('cc_simul'))),'html/tpCorrelDB.html');cd(tempdir);</span>
+[ci,cg]=<span class=sdt>cc_simul</span>(<span class=string>'loadDBTest'</span>); 
+cg.def=ci.Stack(<span class=string>'IdMain'</span>);cg.sel=<span class=string>'-Test'</span>;<span class=sdt>fecom</span>(<span class=string>'showFiTestDef'</span>);
+</pre>
+<p><font class=m>ci</font> is an object pointing to <font class=m><span class=sdt>iiplot</span></font> figure and <font class=m>cf</font> to the <font class=m><span class=sdt>feplot</span></font> figure. For more details, see the SDT documentation with <font class=m><span class=sdt>sdtweb</span>(<span class=string>'diiplot'</span>)</font>. </p><ul class="itemize"><li class="li-itemize">
+3.5) Give an identification result. You must at least give the list of poles, a superposition of transfers illustrating the quality of your results, a visualization of some identified modes. You can use the script below to generate animations. 
+</li></ul><pre class=codeinput>
+ <span class=sdt>fecom</span>(<span class=string>'imwrite'</span>,struct(<span class=string>'ch'</span>,1:3,<span class=string>'Movie'</span>,<span class=string>'Test.gif'</span>)) <span class=comment>% Movies for modes (1:3) </span>
+</pre>
+<p>To save your identification results, you only save your poles in a MATLAB script. A clean display in the command line is achieved with 
+</p><pre class=codeinput>
+ <span class=sdt>idcom</span>(<span class=string>'TableIdMain'</span>)
+</pre>
+<ul class="itemize"><li class="li-itemize">
+3.6) In least-squares problems, inappropriate measurements can lead to significant bias. Explain the following case</li></ul><pre class=codeinput>
+<span class=sdt>idcom</span>(<span class=string>'wmin 0 2500'</span>)
+<span class=sdt>idcom</span>(<span class=string>'estFullBand'</span>); Id1=ci.Stack{<span class=string>'IdMain'</span>};Id1.name=<span class=string>'Est???'</span>;
+<span class=sdt>idcom</span>(<span class=string>'wmin 400 2500'</span>)
+<span class=sdt>idcom</span>(<span class=string>'estFullBand'</span>); Id2=ci.Stack{<span class=string>'IdMain'</span>};Id2.name=<span class=string>'EstW???'</span>;
+<span class=sdt>idcom</span>(<span class=string>'EstLocalPole'</span>); Id3=ci.Stack{<span class=string>'IdMain'</span>};Id3.name=<span class=string>'EstLocalPole'</span>;
+figure(1);subplot(121);<span class=sdt>ii_mac</span>(Id1,Id2,<span class=string>'macplot'</span>);subplot(122);<span class=sdt>ii_mac</span>(Id2,Id3,<span class=string>'macplot'</span>);
+</pre>
+<p>ADDITIONAL QUESTIONS (to be treated at the end or after lab work)</p><ul class="itemize"><li class="li-itemize">
+3.7) complete and comment the implementation below of a single model identification algorithm (frequency domain ARX in the course notes) 
+</li></ul><pre class=codeinput>
+<span class=comment>%% Basic implementation of identification</span>
+XF1=ci.Stack{<span class=string>'Test'</span>};XF1=<span class=sdt>fe_def</span>(<span class=string>'subdef'</span>,XF1,XF1.w&gt;503&amp;XF1.w&lt;512);
+
+figure(1);semilogy(XF1.w,sum(abs(XF1.xf),2)); 
+po=[];
+<span class=keyword>for</span> j1=1:size(XF1.xf,2)
+ s=XF1.w*1i;  H=XF1.xf(:,j1); 
+ A=[-s.*H -s.^2.*H ones(size(s)) s s.^2 ]; B=H;
+ r1=[real(A);imag(A)]\[real(B);imag(B)];
+ ld=roots( ??? ); 
+ ld=ld(1); po(j1,:)=[-real(ld)./abs(ld) abs(ld)];
+<span class=keyword>end</span>
+figure(1);plot(po(:,1),po(:,2),<span class=string>'+'</span>)
+</pre>
+<ul class="itemize"><li class="li-itemize">
+3.8) One now seeks to illustrate the fact that the mode shape is visible in the transfer. Comment the singular value decomposition of the transfer in the vicinity of the second resonance.
+</li></ul><pre class=codeinput>
+<span class=comment>%% Shape and SVD of frequency response</span>
+XF1=ci.Stack{<span class=string>'Test'</span>};XF1=<span class=sdt>fe_def</span>(<span class=string>'subdef'</span>,XF1,XF1.w&gt;503&amp;XF1.w&lt;512);
+[u,s,v]=svd(XF1.xf.',0);s=diag(s);
+figure(12);plot(XF1.w,abs(v*diag(s)));
+du=struct(<span class=string>'def'</span>,u,<span class=string>'DOF'</span>,XF1.dof(:,1),<span class=string>'data'</span>,s/s(1));
+du.LabFcn=<span class=string>'sprintf(''%i si/s1= %.4g'',ch,def.data(ch))'</span>;
+cg.def=du; <span class=comment>% Display shape</span>
+figure(12);<span class=sdt>ii_mac</span>(12,ci.Stack{<span class=string>'IdMain'</span>},du,<span class=string>'MacTable'</span>)
+</pre>
+
+<h3 id="sec14" class="subsection">4.3  Correlation</h3>
+<p>Le script above loads data, builds the observation matrix, defines parameters and computes modes for two distinct values of these parameters. The MAC and the MAC/frequency-error table are then shown.</p><pre class=codeinput>
+[ci,cf]=<span class=sdt>cc_simul</span>(<span class=string>'loadDBCorrel'</span>); 
+<span class=comment>% d1=cf.def;ii_mac(1,'SetMac',struct('db',d1))</span>
+
+<span class=sdt>ii_mac</span>(1,<span class=string>'SetMac'</span>,struct(<span class=string>'da'</span>,ci.Stack{<span class=string>'IdMain'</span>},<span class=string>'Pair'</span>,<span class=string>'A'</span>,<span class=string>'MacPlot'</span>,<span class=string>'Do'</span>))
+<span class=sdt>ii_mac</span>(1,<span class=string>'macErrorTable'</span>);
+</pre>
+<ul class="itemize"><li class="li-itemize">
+3.9) The topology correlation was performed beforehand. The data structure <font class=m>sens</font> contains the data for the observation equation. What is the meaning of the <font class=m>.cta, .DOF, .lab</font> fields (see <font class=m><span class=sdt>sdtweb</span>(<span class=string>'sensor#sstruct'</span>)</font>)</li><li class="li-itemize">3.10) comment the correlation achieved. 
+</li></ul>
+<h3 id="idcomproc" class="subsection">4.4  Annex : Identification procedure</h3>
+<p>La procedure uses a figure containing buttons (<font class=m><span class=string>Ident</span></font> tab) and a figure to display data (<font class=m><span class=sdt>iiplot</span></font>).</p><p><img src="Mevib_ProcId.png">
+<img src="idcom_one.png"></p><ol class="enumerate" type=1><li class="li-enumerate">To identify a mode<ol class="enumerate" type=a><li class="li-enumerate">
+Click on the <font class=m><span class=string>Peak picking (e)</span></font> button (highlighted in yellow).</li><li class="li-enumerate">in the <font class=m><span class=sdt>iiplot</span></font> figure where the responses are shown, click on a resonance peak (<font class=m><span class=string>Pick pole frequency</span></font>)</li><li class="li-enumerate">To validate the result, click on the arrow to the right (highlighted in red). The value is accessible in <font class=m>ci.Stack{<span class=string>'IdMain'</span>}.po </font>.
+To remove a pole, use the left arrow (highlighted in green). </li><li class="li-enumerate">Restart identification as many times as necessary to identify all visible poles. You can alternate with pole refinement described below. </li></ol></li><li class="li-enumerate">After having identified all modes, construct the wide band estimate by clicking on <font class=m><span class=string>est</span></font> (blue)</li><li class="li-enumerate">Select a band where identification is not very good (use <font class=m><span class=string>Set Band (wmo)</span></font> buttons to select and <font class=m><span class=string>Reset band (w0)</span></font> to go back to the full band), and then use one of the optimization algorithms <font class=m><span class=string>eopt</span></font> or <font class=m><span class=string>eup</span></font> (give a number of iterations till convergence (quadratic cost close to a constant)). </li><li class="li-enumerate">Use <font class=m><span class=sdt>idcom</span>(<span class=string>'tableIdMain'</span>)</font> in the Matlab command window and copy the result in your report. </li></ol><p>More details on this process are given in the SDT manual (<a href="https://www.sdtools.com/help/dockid.html#idprocess"><font class=m><span class=sdt>sdtweb</span>(<span class=string>'dockid#idprocess'</span>)</font></a>).</p><br><font class=small>©1991-2020 by SDTools</font><hr>
+<a href="tpModale.html"><img src="previous_motif.gif" alt="Previous"></a>
+<a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
+<a href="ProblemSets006.html"><img src="next_motif.gif" alt="Next"></a>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<meta name="generator" content="hevea 2.06">
+
+<META name="Author" content="Balmes, Bianchi, Vermot des Roches"><link rel="stylesheet" type="text/css" href="sdtools.css">
+<title>Calcul et estimation de transferts (3h)</title>
+</head>
+<!-- DOCNAME: SDT tpModal.html --><body >
+<table border=0 width="100%" cellpadding=0 cellspacing=0><tr>
+<td valign=baseline align=right bgcolor="#9bd0e0">&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="TPMevibtoc.html" target="_top">Contents</a>&nbsp;&nbsp;&nbsp;&nbsp
+<a href="TPMevibfun.html" target="_top">Functions</a>&nbsp;&nbsp;&nbsp;&nbsp
+&nbsp;&nbsp;&nbsp;&nbsp<a href="TPMevib002.html"><img src="previous_motif.gif" alt="Previous"></a>
+<a href="MvId.html"><img src="next_motif.gif" alt="Next"></a>
+&nbsp;&nbsp;&nbsp;&nbsp<a href="TPMevib.pdf">PDF</a>&nbsp;<a href="TPMevibindex.html" target="_top">Index</a></td></table>
+<h2 id="tpModal" class="section">1  Calcul et estimation de transferts (3h)</h2>
+<ul>
+<li><a href="tpModal.html#sec4">Calcul de fonctions de transfert en fréquentiel</a>
+</li></ul>
+<p>Pour aider aux différentes étapes, on fera appel dans MATLAB à des fonctions de la Structural Dynamics Toolbox (<font class=m>sdt</font>) pour le calcul élément</p><p>Les données sont normalement disponibles </p><ul class="itemize"><li class="li-itemize">en local ENSAM. Dans MATLAB faites
+<pre class=codeinput>
+ cd(<span class=string>'X:\Enseignants\balmes\MeVib'</span>)
+ <span class=comment>% Ou cd('\\pa-sciserv1.paris.ensam.fr\Echange\Enseignants\balmes\MeVib')</span>
+ startup <span class=comment>% modifie le PATH de MATLAB pour inclure SDT</span>
+</pre>
+</li><li class="li-itemize"><font class=m>mevib16</font> est la fonction utilisée en support de l'ensemble des modèles. 
+</li></ul>
+<h3 id="sec4" class="subsection">1.1  Calcul de fonctions de transfert en fréquentiel</h3>
+<p>L'objet de cette partie est de comprendre l'influence des termes de la formule (<a href="#eq%2AHmodal">1</a>) pour le calcul des fonctions de transfert comme somme de contributions modales</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell"><a id="eq*Hmodal"> </a> 
+<span style="font-style:italic">H</span>(&#X3C9;) =  [<span style="font-style:italic">c</span>] [&#X2212;<span style="font-style:italic">M</span>&#X3C9;<sup>2</sup>+<span style="font-style:italic">K</span>]<sup>&#X2212;1</sup> [<span style="font-style:italic">b</span>] &#X2248; 
+</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><span style="font-style:italic">NM</span></td></tr>
+<tr><td class="dcell" style="text-align:center"><span style="font-size:xx-large">&#X2211;</span></td></tr>
+<tr><td class="dcell" style="text-align:center"><span style="font-style:italic">j</span>=1</td></tr>
+</table></td><td class="dcell"> </td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">[<span style="font-style:italic">c</span>]{&#X3C6;<sub><span style="font-style:italic">j</span></sub>}{&#X3C6;<sub><span style="font-style:italic">j</span></sub>}<sup><span style="font-style:italic">T</span></sup> [<span style="font-style:italic">b</span>]</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center"> &#X2212;&#X3C9; <sup>2</sup>+<span style="font-style:italic">i</span>&#X3C9;&#X3B6;<sub><span style="font-style:italic">j</span></sub>&#X3C9;<sub><span style="font-style:italic">j</span></sub>+&#X3C9;<sub><span style="font-style:italic">j</span></sub><sup>2</sup></td></tr>
+</table></td><td class="dcell"> 
+    (1)</td></tr>
+</table><p>
+avec
+</p><ul class="itemize"><li class="li-itemize">
+&#X3C9;<sub><span style="font-style:italic">j</span></sub> les fréquences propres (stockée dans le vecteur <font class=m>def.???</font>)
+</li><li class="li-itemize">&#X3B6;<sub><span style="font-style:italic">j</span></sub> les amortissements modaux
+</li><li class="li-itemize">&#X3C6;<sub><span style="font-style:italic">j</span></sub><sup><span style="font-style:italic">T</span></sup>[<span style="font-style:italic">b</span>] la commandabilité modale (modes propres <span style="font-style:italic">T</span>=[&#X3C6;<sub>1</sub> … &#X3C6;<sub><span style="font-style:italic">NM</span></sub>] projetés sur la matrice d'entrée [b])
+</li><li class="li-itemize">[<span style="font-style:italic">c</span>]&#X3C6;<sub><span style="font-style:italic">j</span></sub> l'observabilité modale (modes propres <span style="font-style:italic">T</span>=[&#X3C6;<sub>1</sub> … &#X3C6;<sub><span style="font-style:italic">NM</span></sub>] observés sur [c])
+</li><li class="li-itemize">&#X3C9; les fréquences d'excitation (sera stocké dans le vecteur f)
+</li></ul><p>Un maillage élément fini de la structure a été réalisé en préalable du TP et peut être chargée avec
+</p><pre class=codeinput>
+ mevib16(<span class=string>'loadBrake -cf2'</span>); <span class=comment>% Display FEM modes button</span>
+ model
+ def
+</pre>
+<p>où <font class=m>model</font> est une structure avec les noeuds, éléments, propriétés, ... et <font class=m>def</font> avec les 30 premiers modes (dont le calcul a été réalisé préalablement pour éviter des problèmes de temps de calcul sur des machines un peu lentes).</p><ul class="itemize"><li class="li-itemize">
+Q1: Identifiez les données présentes dans la structure <font class=m>def</font> dans la formule (<a href="#eq%2AHmodal">1</a>) et dans la vue du maillage affichée à l'écran : que signifient le champ <font class=m>.DOF</font> et les lignes de <font class=m>.def</font>, que signifient les colonnes de <font class=m>.def</font> et les valeurs de <font class=m>.data</font> ?
+</li><li class="li-itemize">Q2: cliquez sur le bouton <img src="mprop.png"> dans <font class=m><span class=sdt>feplot</span></font>. Listez les données nécessaires à calcul élément fini conduisant aux modes. Comment peut on compter le nombre de DDL (DOF) ?
+</li><li class="li-itemize">Q3: A partir du calcul numérique des modes, quelle information complémentaire est nécessaire pour calculer une fonction de transfert ? Autrement dit que signifient <font class=m>damp,in,out</font> dans le code suivant qui construit les transferts ?
+</li></ul><pre class=codeinput>
+ mevib16(<span class=string>'loadBrake -cf2'</span>);
+ damp=.01;    <span class=comment>% ???</span>
+ in=23199.03; <span class=comment>% ???</span>
+ out=[23199;23283;5161;5170]+.03; <span class=comment>% ???</span>
+ <span class=sdt>fecom</span>(<span class=string>'shownodemark'</span>,out,<span class=string>'color'</span>,<span class=string>'r'</span>,<span class=string>'markersize'</span>,10)
+ f=linspace(0,5000,2048)'; <span class=comment>% frequencies</span>
+ sys=<span class=sdt>nor2ss</span>(def,damp,in,out,<span class=string>'Hz vel'</span>); 
+ <span class=sdt>qbode</span>(sys,f*2*pi,<span class=string>'iiplot "simul1" -po'</span>);
+ ci=<span class=sdt>iiplot</span>; <span class=comment>% pointer to responses</span>
+ ci.Stack{<span class=string>'simul1'</span>}.X(2:3)={<span class=sdt>fe_c</span>(in) <span class=sdt>fe_c</span>(out)}; <span class=comment>% Clean labels</span>
+ <span class=sdt>iicom</span>(<span class=string>';iix:simul1only;sub1 1;ch1:4'</span>);
+</pre>
+<ul class="itemize"><li class="li-itemize">
+Q4: A quoi correspondent les 6 modes à fréquence nulle? quelle est la fréquence du premier mode flexible ?</li><li class="li-itemize">Q5: On veut faire le lien entre la vue spatiale (forme modale) et la vue fréquentielle (fonction de transfert avec résonances). Pourquoi le premier mode flexible n'est il pas visible dans le transfert ? quelle quantité de la formule (<a href="#eq%2AHmodal">1</a>) est petite ?</li><li class="li-itemize">Q6: La courbe ci-dessous affiche trois calcul associés à un amortissement modal de 1%, 0.5% et un amortissement de Rayleigh <span style="font-style:italic">C</span>=&#X3B1; <span style="font-style:italic">M</span> + &#X3B2; <span style="font-style:italic">K</span> avec &#X3B1;=0 et &#X3B2; tel que &#X3B6;<sub><span style="font-style:italic">i</span></sub>=&#X3B2;&#X3C9;<sub><span style="font-style:italic">i</span></sub>/2. Placez la bonne légende pour <span style="font-style:italic">A</span>,<span style="font-style:italic">B</span>,<span style="font-style:italic">C</span> et justifiez à quelle fréquence est ajustée la valeur &#X3B2; pour que l'amortissement modal correspondant soit de 0.01.<p><img width="99%" src="BrDamp.png">
+</p></li><li class="li-itemize">Q7: Dans un TP ultérieur, on s'intéressera au mode de flexion du guide cable à 1780 Hz. 
+Pour être sûr de bien identifier sa fréquence, on utilise un filtre modal (combinaison des 4 mesures) pour rejeter les modes 10 et 15. Commentez les courbes ci-dessous.<p><img width="99%" src="BrFilter.png"></p><pre class=codeinput>
+ C1=ci.Stack{<span class=string>'simul1'</span>};
+ imode=[12 14 17];
+ cp=<span class=sdt>fe_c</span>(def.DOF,out)*def.def(:,imode); <span class=comment>% que signifie cp ?</span>
+ r2=[0 1 0]*pinv(cp);<span class=comment>% Filtre modal : que vaut r2*cp</span>
+ r1=[C1.Y*r2(:) C1.Y];
+ iw=find(C1.X{1}&gt;500&amp;C1.X{1}&lt;2500);r1=r1*(diag(1./max(abs(r1(iw,:)))));
+ figure(1);h=plot(C1.X{1},abs(r1));<span class=sdt>ii_plp</span>(def.data(imode)*[1 .0]);
+ set(h(1),<span class=string>'linewidth'</span>,3);xlabel(<span class=string>'Frequency [Hz]'</span>);
+</pre>
+</li></ul>
+<br><font class=small>©1991-2015 by SDTools</font><hr>
+<a href="TPMevib002.html"><img src="previous_motif.gif" alt="Previous"></a>
+<a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
+<a href="MvId.html"><img src="next_motif.gif" alt="Next"></a>
+</body>
+</html>

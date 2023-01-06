@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="generator" content="hevea 2.06">
+
+<META name="Author" content="Balmes, Bianchi, Vermot des Roches, Martin"><link rel="stylesheet" type="text/css" href="sdtools.css">
+<title>Consistence study for a one DOF system</title>
+</head>
+<!-- DOCNAME: SDT tp1DOFe.html --><body >
+<table border=0 width="100%" cellpadding=0 cellspacing=0><tr>
+<td valign=baseline align=right bgcolor="#9bd0e0">&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="ProblemSetstoc.html" target="_top">Contents</a>&nbsp;&nbsp;&nbsp;&nbsp
+<a href="ProblemSetsfun.html" target="_top">Functions</a>&nbsp;&nbsp;&nbsp;&nbsp
+&nbsp;&nbsp;&nbsp;&nbsp<a href="ProblemSets002.html"><img src="previous_motif.gif" alt="Previous"></a>
+<a href="tpModale.html"><img src="next_motif.gif" alt="Next"></a>
+&nbsp;&nbsp;&nbsp;&nbsp<a href="ProblemSets.pdf">PDF</a>&nbsp;<a href="ProblemSetsindex.html" target="_top">Index</a></td></table>
+<h2 id="tp1DOFe" class="section">2  Consistence study for a one DOF system</h2>
+<ul>
+<li><a href="tp1DOFe.html#sec4">Free response and FFT</a>
+</li><li><a href="tp1DOFe.html#sec5">Forced response</a>
+</li><li><a href="tp1DOFe.html#sec6">Non-linear response</a>
+</li><li><a href="tp1DOFe.html#sec7">Sweep excitation</a>
+</li></ul>
+<p>The idea is here to run a numerical simulation of a system with known behavior in order to check that you understand how to used basic tools : time integration, differences between the continuous and discrete Fourier transform, properties of the basic oscillator. </p><div class="center"><img style="width:156pt" src="onedraw.png"></div>
+<h3 id="sec4" class="subsection">2.1  Free response and FFT</h3>
+<p>Questions :</p><ul class="itemize"><li class="li-itemize">1. Write the state space model associated with a spring mass system with <span style="font-style:italic">M</span> = 1, <span style="font-style:italic">K</span>=4<span style="font-style:italic">e</span>2
+</li><li class="li-itemize">2. Choose <span style="font-style:italic">C</span> to have a damping ratio of 1 % (tip : you need to compute eigenvalues of the state matrix <span style="font-style:italic">A</span> at see the ration between the real part and the amplitude of poles)
+</li><li class="li-itemize">3. Use a time integration function <font class=m><span class=sdt>ode45</span></font> (in the engine cover application, we will also use <font class=m><span class=sdt>lsim</span></font> which is faster but only works for LTI systems), to compute the response to a non zero initial condition. Plot this response.</li><li class="li-itemize">4. Chooze a time interval and compute the Fourier transform (using <font class=m>fft</font>). Find the resonance frequency and in this FFT (compute the frequencies from the time vector).</li><li class="li-itemize">5. Illustrate the influence of the damping ration by overlaying the <font class=m>fft</font> for three distinct values of <span style="font-style:italic">C</span>.</li></ul><p>Programming suggestions 
+</p><pre class=codeinput>
+<span class=comment>% Create your deriv function which will have (t,y,PA) as inputs</span>
+<span class=comment>% Store all parameters in a structure</span>
+PA=struct(<span class=string>'A'</span>,[],<span class=string>'B'</span>,[],<span class=string>'u'</span>,[]);
+ [t,y]=<span class=sdt>ode45</span>(@deriv,tspan,y0,odeset,PA)
+<span class=comment>% Use t,y for time, F,Y for frequency response</span>
+
+<span class=comment>% Damping study, store multiple results as a structure, then finalize plot</span>
+damp=[ ??? ];
+C1=struct(<span class=string>'X'</span>,[],<span class=string>'Y'</span>,[]); <span class=comment>% prepare structure for result</span>
+<span class=keyword>for</span> j1=1:length(damp)
+ ???
+ C1.X=f; C1.Y(:,j1)=Y(:,1); <span class=comment>% store first column for each result in loop</span>
+<span class=keyword>end</span>
+
+<span class=comment>% Finalize plot</span>
+plot(C1.X,C1.Y);xlabel(<span class=string>'x'</span>);ylabel(<span class=string>'y'</span>);set(gca,<span class=string>'xlim'</span>,[0 50])
+</pre>
+
+<h3 id="sec5" class="subsection">2.2  Forced response</h3>
+<p>Questions :</p><ol class="enumerate" type=1><li class="li-enumerate">Apply a sinusoidal force (choose the amplitude and frequency) and illustrate how the corresponding frequency appears in the <font class=m>fft</font> of the response. </li><li class="li-enumerate">Illustrate windowing issues by keeping an integer/non-integer number of periods, in other words, a frequency that exists/does not exist in the spectrum.</li><li class="li-enumerate">Illustrate how the transient decreases and depends on initial conditions. (Tip : compare <font class=m>fft</font> for a full signal or a signal starting at <span style="font-style:italic">T</span>&gt;0). </li><li class="li-enumerate">Illustrate Shannon's theorem by using an excitation above the half sampling frequency (spectrum symmetry point). </li></ol><p>Programming suggestions 
+</p><pre class=codeinput>
+<span class=comment>% Forced response</span>
+PA.u=@(t)sin(10*t); <span class=comment>% Define an "anonymous" function for response</span>
+<span class=comment>% Truncate the first 10 s</span>
+ind=(t&gt;10);t=t(ind);y=y(ind,:); 
+</pre>
+
+<h3 id="sec6" class="subsection">2.3  Non-linear response</h3>
+<p>One now considers the classical cubic non-linearity (even if this rarely corresponds to something mechanical)</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
+<span style="font-style:italic">M</span>  <span style="font-style:italic">q</span> + <span style="font-style:italic">C</span> q + <span style="font-style:italic">K</span> (<span style="font-style:italic">q</span>+α <span style="font-style:italic">q</span><sup>3</sup>) = <span style="font-style:italic">F</span>(<span style="font-style:italic">t</span>)
+    (1)</td></tr>
+</table><ul class="itemize"><li class="li-itemize">
+Apply a sinusoidal force. What frequencies are seen in the response <font class=m>fft</font> ? </li><li class="li-itemize">How does the response at harmonics of the excitation frequency vary with amplitude (or the α coefficient).</li></ul><p>α=10<sup>&#8722;6</sup> is a decent starting value. Pay attention to the need to eliminate the transient associated with the initial condition.</p>
+<h3 id="sec7" class="subsection">2.4  Sweep excitation</h3>
+<p>
+One considers an excitation through a swepped sine 
+</p><pre class=codeinput>
+ PA=struct(<span class=string>'A'</span>, ??? ,<span class=string>'B'</span>,[0;1],<span class=string>'u'</span>,[]); <span class=comment>% Adjust damping here</span>
+ fmin=15;fmax=25;PA.u=@(t)cos((fmin+(fmax-fmin)/2*t/tspan(<span class=keyword>end</span>))*t);  <span class=comment>% Sweep</span>
+</pre>
+<ul class="itemize"><li class="li-itemize">
+In the time response, how is the resonance visible ?
+</li><li class="li-itemize">How does the variance (<font class=m>var</font>) change with damping ?
+</li></ul>
+<br><font class=small>©1991-2020 by SDTools</font><hr>
+<a href="ProblemSets002.html"><img src="previous_motif.gif" alt="Previous"></a>
+<a href="index.html"><img src="contents_motif.gif" alt="Up"></a>
+<a href="tpModale.html"><img src="next_motif.gif" alt="Next"></a>
+</body>
+</html>

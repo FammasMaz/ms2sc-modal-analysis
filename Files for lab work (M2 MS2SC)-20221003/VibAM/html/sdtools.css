@@ -1,0 +1,104 @@
+BODY {
+	FONT-SIZE: 10pt; BACKGROUND: #ffffff; FONT-FAMILY: arial,helvetica,sans-serif
+}
+A:link {
+	COLOR: #0033cc; FONT-FAMILY: arial,helvetica,sans-serif
+}
+A:visited {
+	COLOR: #666666; FONT-FAMILY: arial,helvetica,sans-serif
+}
+A:active {
+	COLOR: #0033cc; FONT-FAMILY: arial,helvetica,sans-serif
+}
+A:hover {
+	COLOR: #666666; FONT-FAMILY: arial,helvetica,sans-serif
+}
+H1 {
+	FONT-SIZE: 16pt; MARGIN-LEFT: 20px; LINE-HEIGHT: 3pt; PADDING-TOP: 10pt; FONT-FAMILY: arial,helvetica,sans-serif
+}
+P {
+	MARGIN-TOP: 3px; FONT-SIZE: 10pt; MARGIN-BOTTOM: 0px; PADDING-BOTTOM: 0px; MARGIN-LEFT: 20px; FONT-FAMILY: arial,helvetica,sans-serif
+}
+.subhead {
+	FONT-WEIGHT: bold; FONT-SIZE: 11pt; MARGIN-LEFT: 20px; FONT-FAMILY: arial,helvetica,sans-serif
+}
+.medium {
+	FONT-SIZE: 9pt
+}
+.small {
+	FONT-SIZE: 8pt
+}
+.smalltest {
+	FONT-SIZE: 11px
+}
+.smallnoindent {
+	FONT-SIZE: 9pt; MARGIN-LEFT: 0pt
+}
+.caption {
+	FONT-SIZE: 9pt; FONT-STYLE: italic
+}
+.quote {
+	FONT-SIZE: 9pt; COLOR: #003399; FONT-STYLE: italic
+}
+.plain {
+	TEXT-DECORATION: none
+}
+.noindent {
+	MARGIN-LEFT: 0pt
+}
+.nav {
+	TEXT-DECORATION: none
+}
+.code {
+	FONT-SIZE: 10pt; MARGIN-LEFT: 40px; FONT-FAMILY: monospace
+}
+.m {
+	FONT-SIZE: 10pt; FONT-FAMILY: monospace; COLOR: #0000AA
+}
+.trademark {
+	FONT-SIZE: 7pt; FONT-FAMILY: Arial,Helvetica,sans-serif
+}
+.h1subprod {
+	FONT-WEIGHT: bold; FONT-SIZE: 16pt; MARGIN-LEFT: 20px; COLOR: #000066; FONT-FAMILY: Arial,Helvetica,sans-serif
+}
+
+.h1subind {
+	FONT-WEIGHT: bold; FONT-SIZE: 16pt; MARGIN-LEFT: 20px; COLOR: #000066; FONT-FAMILY: Arial,Helvetica,sans-serif
+}
+.h1subcomp {
+	FONT-WEIGHT: bold; FONT-SIZE: 16pt; MARGIN-LEFT: 20px; COLOR: #660033; FONT-FAMILY: Arial,Helvetica,sans-serif
+}
+.h1subsup {
+	FONT-WEIGHT: bold; FONT-SIZE: 16pt; MARGIN-LEFT: 20px; COLOR: #000033; FONT-FAMILY: Arial,Helvetica,sans-serif
+}
+.h1subconsult {
+	FONT-WEIGHT: bold; FONT-SIZE: 16pt; MARGIN-LEFT: 20px; COLOR: #0b5a6d; FONT-FAMILY: Arial,Helvetica,sans-serif
+}
+.h1subsup2 {
+	FONT-WEIGHT: bold; FONT-SIZE: 11pt; MARGIN-LEFT: 1px; COLOR: #003333; FONT-FAMILY: Arial,Helvetica,sans-serif
+}
+.midprod {
+	FONT-WEIGHT: bold; FONT-SIZE: 12pt; MARGIN-LEFT: 20px; COLOR: #000066; FONT-FAMILY: arial,helvetica,sans-serif
+}
+.midcomp {
+	FONT-WEIGHT: bold; FONT-SIZE: 12pt; MARGIN-LEFT: 20px; COLOR: #660033; FONT-FAMILY: arial,helvetica,sans-serif
+}
+.midind {
+	FONT-WEIGHT: bold; FONT-SIZE: 12pt; MARGIN-LEFT: 20px; COLOR: #000066; FONT-FAMILY: arial,helvetica,sans-serif
+}
+TABLE {	BORDER-RIGHT: medium none; BORDER-TOP: medium none; BORDER-LEFT: medium none; BORDER-BOTTOM: medium none}
+TD {	FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sans-serif}
+UL {	FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sans-serif}
+OL {	FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sans-serif}
+TT {	COLOR: #0000AA}
+PRE {	COLOR: #0000AA}
+span.keyword {color: #0000FF}
+span.sdt {color: #0077FF}
+span.comment {color: #228B22}
+span.string {color: #A020F0}
+span.untermstring {color: #B20000}
+span.syscmd {color: #B28C00}
+pre.codeinput {
+  background: #EEEEEE;
+  padding: 10px;
+}
